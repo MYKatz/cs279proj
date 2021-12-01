@@ -40,6 +40,10 @@ def build_feature_model(num_shells, shell_width, num_bins):
     return f"{out_dir}/model.model"
 
 
+def evaluate_model(model_path):
+    os.system(f"")
+
+
 for num_shells in NUM_SHELLS:
     for shell_width in SHELL_WIDTH:
         for num_bins in NUM_BINS:
