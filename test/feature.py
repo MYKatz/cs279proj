@@ -15,6 +15,8 @@ SCOREIT = f"{FEATURE_PATH}/bin/scoreit"
 POSITIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/trypsin_ser_og.pos.ptf"
 NEGATIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/trypsin_ser_og.neg.ptf"
 
+EVAL_EXAMPLES = "/home/katz/Code/cs279proj/eval/1bqy_ser_og.ff"
+
 # Parameters to test
 NUM_SHELLS = [6]
 SHELL_WIDTH = [1.25]
@@ -40,8 +42,13 @@ def build_feature_model(num_shells, shell_width, num_bins):
     return f"{out_dir}/model.model"
 
 
-def evaluate_model(model_path):
-    os.system(f"")
+def score_model(model_path):
+    out_dir = model_path.replace("/model.model", "")
+
+    os.system(f"{SCOREIT} -a {model_path} {EVAL_EXAMPLES} > {out_dir}/hits.hits")
+    # remove comments
+    os.system(f"sed '/^#/d' {out_dir}/hits.hits > {out_dir}/hits_cleaned.hits")
+    os.system(f"sort -k2 -n {out_dir}/hits_cleaned.hits > {out_dir}/hits.sorted")
 
 
 for num_shells in NUM_SHELLS:
@@ -49,3 +56,4 @@ for num_shells in NUM_SHELLS:
         for num_bins in NUM_BINS:
             # relative model path
             model_path = build_feature_model(num_shells, shell_width, num_bins)
+            score_model(model_path)
