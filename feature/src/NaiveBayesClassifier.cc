@@ -4,6 +4,7 @@
 // $Id: NaiveBayesClassifier.cc 1618 2014-01-15 06:01:03Z mikewong899 $
 
 #include "NaiveBayesClassifier.h"
+#include <iostream>
 
 NaiveBayesClassifier::NaiveBayesClassifier( int _numBins, double _pPos ) {
 	numBins    = _numBins;
@@ -25,8 +26,19 @@ void NaiveBayesClassifier::train( Doubles *pos, Doubles *neg ) {
 	posBinCount = vector<int>( numBins );
 	negBinCount = vector<int>( numBins );
 
+	/* std::cout << "begin output" << std::endl;
+	for(int i = 0; i < pos->size(); i++) {
+		std::cout << (*pos)[i] << std::endl;
+	}
+	std::cout << "--" << std::endl;
+	for(int i = 0; i < neg->size(); i++) {
+		std::cout << (*neg)[i] << std::endl;
+	}
+	std::cout << "end output" << std::endl; */
+
 	if( ! isRangeSet ) calculateRange( pos, neg );
 	calculateBinSize();
+	calculateGaussian(pos, neg);
 
 	numPos = count( pos, posBinCount );
 	numNeg = count( neg, negBinCount );
@@ -86,6 +98,37 @@ void NaiveBayesClassifier::calculateRange( Doubles *pos, Doubles *neg ) {
         if ((*iter) < min) { min = (*iter); }
     }
 	min += FUDGE_FACTOR;
+}
+
+void NaiveBayesClassifier::calculateGaussian( Doubles *pos, Doubles *neg) {
+	double tot = 0;
+	double num = 0;
+
+	Doubles::iterator iter;
+    for (iter = pos->begin(); iter != pos->end(); iter++) {
+        tot += *iter;
+		num += 1;
+    }
+    for (iter = neg->begin(); iter != neg->end(); iter++) {
+        tot += *iter;
+		num += 1;
+    }
+
+	mean = tot / num;
+
+	double s = 0;
+	for (iter = pos->begin(); iter != pos->end(); iter++) {
+        double v = (*iter) - mean;
+		s += v*v;
+    }
+    for (iter = neg->begin(); iter != neg->end(); iter++) {
+        double v = (*iter) - mean;
+		s += v*v;
+    }
+
+	stdev = sqrt(s / num);
+
+	/* std::cout << "mean: " << mean << "stdev: " << stdev << std::endl; */
 }
 
 int NaiveBayesClassifier::count( Doubles *values, vector<int> &countBin ) {

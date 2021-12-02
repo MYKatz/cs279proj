@@ -30,6 +30,8 @@ class NaiveBayesClassifier {
 		double         min;
 		double         max;
 		double         binSize;
+		double         mean;
+		double         stdev;
 		bool           isRangeSet;
 		int            numPos;
 		int            numNeg;
@@ -40,6 +42,7 @@ class NaiveBayesClassifier {
 		void calculateBinSize() { binSize = (max - min) / numBins; };
 		void calculateBinScores();
 		void calculateRange( Doubles *, Doubles * );
+		void calculateGaussian(Doubles *, Doubles *);
 		int  count( Doubles *, vector<int> & );
 
 	public:
