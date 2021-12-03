@@ -3,6 +3,7 @@ Program for bulk testing FEATURE models with different parameters.
 """
 
 import os
+import time
 import tempfile
 
 FEATURE_PATH = os.getenv("FEATURE_PATH") or "./feature"
@@ -30,6 +31,8 @@ NUM_BINS = [5, 10]
 
 def build_feature_model(num_shells, shell_width, num_bins):
 
+    start_time = time.time()
+
     out_dir = f"out/{num_shells}-{shell_width}-{num_bins}-{GAUSSIAN_LABEL}"
     os.makedirs(out_dir)
 
@@ -44,10 +47,17 @@ def build_feature_model(num_shells, shell_width, num_bins):
         f"{BUILDMODEL} -n {num_shells} -b {num_bins} {out_dir}/pos.ff {out_dir}/neg.ff > {out_dir}/model.model"
     )
 
+    model_build_time = time.time() - start_time
+
+    os.system(f"echo {model_build_time} > {out_dir}/model_build_time")
+
     return f"{out_dir}/model.model"
 
 
 def score_model(model_path, num_shells, shell_width):
+
+    start_time = time.time()
+
     out_dir = model_path.replace("/model.model", "")
 
     # regenerate .ff file
@@ -58,6 +68,10 @@ def score_model(model_path, num_shells, shell_width):
     # remove comments
     os.system(f"sed '/^#/d' {out_dir}/hits.hits > {out_dir}/hits_cleaned.hits")
     os.system(f"sort -k2 -n {out_dir}/hits_cleaned.hits > {out_dir}/hits.sorted")
+
+    eval_time = time.time() - start_time
+
+    os.system(f"echo {eval_time} > {out_dir}/eval_time")
 
 
 for num_shells in NUM_SHELLS:
