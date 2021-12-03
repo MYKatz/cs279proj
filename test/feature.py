@@ -117,7 +117,7 @@ def score_model(model_path, num_shells, shell_width):
     os.system(f"{SCOREIT} -a {model_path} {EVAL_EXAMPLES}/{EVAL_NAME}.ff > {out_dir}/hits.hits")
     # remove comments
     os.system(f"sed '/^#/d' {out_dir}/hits.hits > {out_dir}/hits_cleaned.hits")
-    os.system(f"sort -k2 -n {out_dir}/hits_cleaned.hits > {out_dir}/hits.sorted")
+    os.system(f"sort -r -k2 -n {out_dir}/hits_cleaned.hits > {out_dir}/hits.sorted")
 
     eval_time = time.time() - start_time
 
