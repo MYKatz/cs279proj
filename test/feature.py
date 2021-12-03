@@ -13,8 +13,8 @@ BUILDMODEL = f"{FEATURE_PATH}/bin/buildmodel"
 SCOREIT = f"{FEATURE_PATH}/bin/scoreit"
 
 # Training examples paths
-POSITIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/trypsin_ser_og.pos.ptf"
-NEGATIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/trypsin_ser_og.neg.ptf"
+POSITIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/t_ca_sites.ptf"
+NEGATIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/t_ca_nonsites.ptf"
 
 EVAL_EXAMPLES = "/home/katz/Code/cs279proj/eval/"
 EVAL_NAME = "1bqy_ser_og" # .ff file should exist, will create .ptf
@@ -24,10 +24,9 @@ GAUSSIAN_LABEL="gauss"
 # Parameters to test
 NUM_SHELLS = [
     6,
-    3,
 ]
-SHELL_WIDTH = [1.25, 1, 0.5]
-NUM_BINS = [5, 10]
+SHELL_WIDTH = [1.25]
+NUM_BINS = [5]
 
 def build_feature_model(num_shells, shell_width, num_bins):
 
