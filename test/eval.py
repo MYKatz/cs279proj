@@ -18,7 +18,7 @@ HITS_SORTED_FILE = "/home/katz/Code/cs279proj/out/6-1.25-5-nongauss/hits-r.sorte
 # max distance for each point
 HIT_ANGSTROM_MAX_DISTANCE = 3
 
-TARGET_SPECIFICITY = 0.99
+TARGET_SPECIFICITY = 0.90
 
 
 
@@ -85,8 +85,6 @@ with open(HITS_SORTED_FILE, "r") as f:
     true_neg = 0
     false_neg = 0
 
-    print(cutoff_ind)
-
     for line in lines:
         i += 1
         line = line.split("\t")
@@ -97,7 +95,6 @@ with open(HITS_SORTED_FILE, "r") as f:
 
         if hit and i <= cutoff_ind:
             true_pos += 1
-            print(i, true_pos)
         if hit and i > cutoff_ind:
             false_neg += 1
         if not hit and i <= cutoff_ind:
@@ -106,10 +103,6 @@ with open(HITS_SORTED_FILE, "r") as f:
             true_neg += 1
         
     assert(true_pos + false_pos + true_neg + false_neg)
-
-    print(true_pos)
-    print(false_pos)
-    print(false_neg)
 
 
     print("Sensitivity: ", true_pos / (true_pos + false_neg))
