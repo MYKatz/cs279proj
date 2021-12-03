@@ -6,7 +6,7 @@
 #include "NaiveBayesClassifier.h"
 #include <iostream>
 
-const bool USE_GAUSSIAN = false;
+const bool USE_GAUSSIAN = true;
 
 // from https://www.johndcook.com/blog/cpp_phi/
 double cdf(double x)

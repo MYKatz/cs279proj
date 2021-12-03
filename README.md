@@ -9,4 +9,8 @@
 5. Write the rest of the code
 6. Run
 
+## Configuration
+
+Set `USE_GAUSSIAN` const in NaiveBayesClassifier.cc if you want to sample from a gaussian rather than unifrom distribution in the Naive bayes training process. Remember to recompile feature (yes, this is a dumb way to do this.)
+
 
