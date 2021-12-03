@@ -17,22 +17,19 @@ NEGATIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/trypsin_ser_og.n
 
 EVAL_EXAMPLES = "/home/katz/Code/cs279proj/eval/1bqy_ser_og.ff"
 
+GAUSSIAN_LABEL="nogauss"
+
 # Parameters to test
-""" NUM_SHELLS = [
+NUM_SHELLS = [
     6,
     3,
 ]
 SHELL_WIDTH = [1.25, 1, 0.5]
-NUM_BINS = [5, 10] """
-NUM_SHELLS = [
-    6,
-]
-SHELL_WIDTH = [1.25]
-NUM_BINS = [5]
+NUM_BINS = [5, 10]
 
 def build_feature_model(num_shells, shell_width, num_bins):
 
-    out_dir = f"out/{num_shells}-{shell_width}-{num_bins}"
+    out_dir = f"out/{num_shells}-{shell_width}-{num_bins}-{GAUSSIAN_LABEL}"
     os.makedirs(out_dir)
 
     os.system(
