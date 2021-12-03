@@ -97,6 +97,8 @@ class Model {
 			double  tValue;
 			double  binSize;
 			double  lowValue;
+			double 	mean;
+			double 	stdev;
 			int     numBins;
 			Doubles binScores;
 

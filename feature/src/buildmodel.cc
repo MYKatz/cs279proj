@@ -100,7 +100,6 @@ extern char *optarg;
 extern int optind;
 
 void eusage() {
-    printf("\n%s (build %s) - %s\n\n", PACKAGE_STRING, SVN_REV, progname.c_str());
     printf("Usage: %s [OPTIONS] SITEFEATURES NONSITEFEATURES\n", progname.c_str());
     printf("\n");
     printf("Options:\n");

@@ -5,6 +5,32 @@
 
 #include "Model.h"
 
+const bool USE_GAUSSIAN = true;
+
+// from https://www.johndcook.com/blog/cpp_phi/
+double cdff(double x)
+{
+    // constants
+    double a1 =  0.254829592;
+    double a2 = -0.284496736;
+    double a3 =  1.421413741;
+    double a4 = -1.453152027;
+    double a5 =  1.061405429;
+    double p  =  0.3275911;
+
+    // Save the sign of x
+    int sign = 1;
+    if (x < 0)
+        sign = -1;
+    x = fabs(x)/sqrt(2.0);
+
+    // A&S formula 7.1.26
+    double t = 1.0/(1.0 + p*x);
+    double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
+
+    return 0.5*(1.0 + sign*y);
+}
+
 Model::Model( double pLevel, int numBins, int numShells ) {
 	metadata = new Metadata( "buildmodel" );
 	enableMetadataKeywords( metadata );
@@ -91,7 +117,19 @@ double Model::getBinScore( const string& property, int shellIndex, double value 
         return (0.0);
     if (score->pValue > this->pLevel)
         return (0.0);
-    int bin = (int) ((value - score->lowValue) / score->binSize);
+	int bin;
+	if (USE_GAUSSIAN) {
+		if (score->stdev == 0) {
+			bin = (int) ((value - score->lowValue) / score->binSize);
+		} else {
+			double z = ((value) - score->mean) / score->stdev;
+			double binsize = (double)1 / ((double)numBins); 
+			double percentile = cdff(z);
+			bin = (int) (percentile / binsize);
+		}
+	} else {
+    	bin = (int) ((value - score->lowValue) / score->binSize);
+	}
 	bin = bin < 0 ? 0 : bin;
 	bin = bin > (numBins - 1) ? (numBins - 1) : bin;
     return ( score->binScores[ bin ] );
@@ -171,6 +209,8 @@ void Model::train( Environments *sites, Environments *nonsites, double pSite, Mo
 			score->tValue     = rs.tValue;
 			score->binSize    = nbc.getBinSize();
 			score->lowValue   = nbc.getMin();
+			score->mean = nbc.getMean();
+			score->stdev = nbc.getStdev();
 			score->binScores  = Doubles( numBins );
 			for( int bin = 0; bin < numBins; bin++ ) {
 				score->binScores[ bin ] = nbc.getBinScore( bin );
@@ -192,6 +232,8 @@ void Model::write( bool extendedOutput ) {
 			printf( "\t%g", score->pValue);
 			printf( "\t%g", score->lowValue );
 			printf( "\t%g", score->binSize );
+			printf( "\t%g", score->mean );
+			printf( "\t%g", score->stdev );
 			for (int bin = 0; bin < numBins; bin++) {
 				printf( "\t%g", score->binScores[ bin ]);
 			}
@@ -223,6 +265,8 @@ void Model::Score::parse( stringstream &bufferStream ) {
 	bufferStream >> pValue;
 	bufferStream >> lowValue;
 	bufferStream >> binSize;
+	bufferStream >> mean;
+	bufferStream >> stdev;
 	
 	binScores = Doubles( numBins );
 	for( int bin = 0; bin < numBins; bin++ ) {

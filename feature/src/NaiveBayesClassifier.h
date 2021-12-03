@@ -52,6 +52,8 @@ class NaiveBayesClassifier {
 		double getBinScore( int i )           { return binScore[ i ]; };
 		double getBinSize()                   { return binSize; };
 		double getMin()                       { return min;     };
+		double getMean()                       { return mean;     };
+		double getStdev()                       { return stdev;     };
 		void   setRange( double, double );
 		void   train( Doubles *, Doubles * );
 };

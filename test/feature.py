@@ -67,7 +67,7 @@ GAUSSIAN_LABEL="gauss"
 
 # Parameters to test
 NUM_SHELLS = [
-    6,
+    4,
 ]
 SHELL_WIDTH = [1.25]
 NUM_BINS = [5]
@@ -76,7 +76,7 @@ def build_feature_model(num_shells, shell_width, num_bins):
 
     start_time = time.time()
 
-    out_dir = f"out/{num_shells}-{shell_width}-{num_bins}-{GAUSSIAN_LABEL}"
+    out_dir = f"out/{num_shells}-{shell_width}-{num_bins}-{GAUSSIAN_LABEL}-expr"
     os.makedirs(out_dir)
 
     os.system(
