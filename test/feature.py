@@ -12,12 +12,56 @@ FEATURIZE = f"{FEATURE_PATH}/bin/featurize"
 BUILDMODEL = f"{FEATURE_PATH}/bin/buildmodel"
 SCOREIT = f"{FEATURE_PATH}/bin/scoreit"
 
+ATOMSELECTOR_PATH = f"{FEATURE_PATH}/tools/bin/atomselector.py"
+
 # Training examples paths
 POSITIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/t_ca_sites.ptf"
 NEGATIVE_TRAINING_EXAMPLES = "/home/katz/Code/cs279proj/example/t_ca_nonsites.ptf"
 
 EVAL_EXAMPLES = "/home/katz/Code/cs279proj/eval/"
-EVAL_NAME = "1bqy_ser_og" # .ff file should exist, will create .ptf
+EVAL_NAME = "eval" # .ff file should exist, will create .ptf
+EVAL_IDS = [
+    "1ARV",
+    "1AXN",
+    "1BP2",
+    "1CEL",
+    "1CLC",
+    "1CVL",
+    "1DJX",
+    "1ESL",
+    "1GCA",
+    "1IVD",
+    "1JAP",
+    "1KIT",
+    "1KUH",
+    "1MHL",
+    "1OVA",
+    "1PNK",
+    "1POC",
+    "1RGA",
+    "1SAC",
+    "1SCM",
+    "1SGT",
+    "1SMD",
+    "1SNC",
+    "1SRA",
+    "1TCO",
+    "1TF4",
+    "1TRK",
+    "1WAD",
+    "1XJO",
+    "2AAA",
+    "2AMG",
+    "2AYH",
+    "2MPR",
+    "2POR",
+    "2PRK",
+    "2SCP",
+    "3DNI",
+    "3MIN",
+    "4SBV",
+    "8TLN"
+]
 
 GAUSSIAN_LABEL="gauss"
 
@@ -53,6 +97,13 @@ def build_feature_model(num_shells, shell_width, num_bins):
     return f"{out_dir}/model.model"
 
 
+def generate_eval_data():
+    for pdb_id in EVAL_IDS:
+        os.system(f"python2.7 {ATOMSELECTOR_PATH} {pdb_id} >> {EVAL_EXAMPLES}/{EVAL_NAME}.ptf")
+
+
+
+
 def score_model(model_path, num_shells, shell_width):
 
     start_time = time.time()
@@ -72,10 +123,10 @@ def score_model(model_path, num_shells, shell_width):
 
     os.system(f"echo {eval_time} > {out_dir}/eval_time")
 
-
-for num_shells in NUM_SHELLS:
-    for shell_width in SHELL_WIDTH:
-        for num_bins in NUM_BINS:
-            # relative model path
-            model_path = build_feature_model(num_shells, shell_width, num_bins)
-            score_model(model_path, num_shells, shell_width)
+if __name__ == "__main__":
+    for num_shells in NUM_SHELLS:
+        for shell_width in SHELL_WIDTH:
+            for num_bins in NUM_BINS:
+                # relative model path
+                model_path = build_feature_model(num_shells, shell_width, num_bins)
+                score_model(model_path, num_shells, shell_width)
