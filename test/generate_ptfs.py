@@ -1,3 +1,9 @@
+"""
+generates site and nonsite ptf files for >= 1 site files
+usage:
+> python3 generate_ptfs.py <XXX_sites.ptf> <XXX_nonsites.ptf> <XXX1.sites> <XXX2.sites> ...
+"""
+
 import sys
 import os.path
 
