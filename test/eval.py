@@ -147,10 +147,7 @@ with open("results/res.csv", "w+") as f:
         print(dir_path)
         name = dir_path.split("/")[-1].replace("-expr", "")
         if name == "out":
-            # exclude the out directory
-            continue
-        # TODO remove, just used because we ran gauss previously
-        if "-gauss" in name:
+            # exclude the out (parent) directory
             continue
         num_shells, shell_width, num_bins, model_mode = tuple(name.split("-"))
         true_positives, false_positives, auc = calc_stats(f"{dir_path}/hits.sorted", name)
