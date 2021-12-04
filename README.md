@@ -13,3 +13,8 @@
 
 Set `USE_GAUSSIAN` const in NaiveBayesClassifier.cc and Model.cc if you want to sample from a gaussian rather than unifrom distribution in the Naive bayes training process. Remember to recompile feature once this change is made (yes, this is poor practice, but we were short on time :(    )
 
+## Citations
+
+Almost all code in the `feature` directory is FEATURE 3.1, downloaded from https://simtk.org/projects/feature. The exceptions to this are `NaiveBayesClassifier.cc` and `Model.cc`, which contain modifications that implement Gaussian Naive Bayes features. These files also contain John D Cook's normal CDF implementation, which was released into the public domain and can be originally found at https://www.johndcook.com/blog/cpp_phi/ 
+
+All of the code in the `test` directory is ours -- this includes the test harness and evaluation script.
