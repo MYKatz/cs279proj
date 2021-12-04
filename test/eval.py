@@ -34,12 +34,7 @@ with open(GOLD_STANDARD_SITE, "r") as f:
                 gold[pdb_id] = []
             gold[pdb_id].append((x, y, z))
 
-
-
-
-def get_rates(target_specificity, hits_sorted_file):
-    # returns index of point if corresponds to a gold standard hit, -1 otherwise
-    def is_hit(pdb_id, x, y, z):
+def is_hit(pdb_id, x, y, z):
         true_positives = gold[pdb_id]
         for i in range(len(true_positives)):
             point = true_positives[i]
@@ -48,7 +43,8 @@ def get_rates(target_specificity, hits_sorted_file):
                 return i
         return -1
 
-    with open(hits_sorted_file, "r") as f:
+actual_negatives = 0
+with open("/home/katz/Code/cs279proj/tmp/out/4-1.25-5-gauss-expr/hits.sorted", "r") as f:
         lines = f.readlines()
         total = len(lines)
         actual_negatives = 0
@@ -61,6 +57,15 @@ def get_rates(target_specificity, hits_sorted_file):
             hit_index = is_hit(pdb_id, x, y, z)
             if hit_index == -1:
                 actual_negatives += 1
+
+
+
+
+def get_rates(target_specificity, hits_sorted_file):
+    # returns index of point if corresponds to a gold standard hit, -1 otherwise
+
+    with open(hits_sorted_file, "r") as f:
+        lines = f.readlines()
         
         target_negatives = int((target_specificity * actual_negatives) // 1)
         num_neg = 0
@@ -132,7 +137,7 @@ def calc_stats(hits_sorted_file, name):
     plt.legend(loc="lower right")
     plt.savefig(f'results/{name}.png')
 
-    plt.clr()
+    plt.clf()
     
     return (true_positives, false_positives, auc)
 
@@ -144,6 +149,10 @@ with open("results/res.csv", "w+") as f:
         if name == "out":
             # exclude the out directory
             continue
+        # TODO remove, just used because we ran gauss previously
+        if "-gauss" in name:
+            continue
         num_shells, shell_width, num_bins, model_mode = tuple(name.split("-"))
         true_positives, false_positives, auc = calc_stats(f"{dir_path}/hits.sorted", name)
+        
         f.write(f"{name}, {num_shells}, {shell_width}, {num_bins}, {model_mode}, {true_positives[0]}, {false_positives[0]}, {true_positives[2]}, {false_positives[2]}, {auc} \n")

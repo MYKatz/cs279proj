@@ -64,7 +64,7 @@ EVAL_IDS = [
     "8TLN"
 ]
 
-GAUSSIAN_LABEL="gauss"
+GAUSSIAN_LABEL="nongauss"
 
 # Parameters to test
 NUM_SHELLS = [
@@ -138,5 +138,5 @@ if __name__ == "__main__":
         for shell_width in SHELL_WIDTH:
             for num_bins in NUM_BINS:
                 params.append((num_shells, shell_width, num_bins))
-    with Pool(10) as p:
+    with Pool(5) as p:
         p.map(do_it, params)
