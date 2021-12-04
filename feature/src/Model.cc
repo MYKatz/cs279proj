@@ -5,7 +5,7 @@
 
 #include "Model.h"
 
-const bool USE_GAUSSIAN = true;
+const bool USE_GAUSSIAN = false;
 
 // from https://www.johndcook.com/blog/cpp_phi/
 double cdff(double x)

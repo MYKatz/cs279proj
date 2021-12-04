@@ -4,7 +4,8 @@ Program for bulk testing FEATURE models with different parameters.
 
 import os
 import time
-import tempfile
+from multiprocessing import Pool
+
 
 FEATURE_PATH = os.getenv("FEATURE_PATH") or "./feature"
 
@@ -68,9 +69,10 @@ GAUSSIAN_LABEL="gauss"
 # Parameters to test
 NUM_SHELLS = [
     4,
+    6,
 ]
-SHELL_WIDTH = [1.25]
-NUM_BINS = [5]
+SHELL_WIDTH = [1.00, 1.25, 1.50]
+NUM_BINS = [3, 5, 7]
 
 def build_feature_model(num_shells, shell_width, num_bins):
 
@@ -111,10 +113,10 @@ def score_model(model_path, num_shells, shell_width):
     out_dir = model_path.replace("/model.model", "")
 
     # regenerate .ff file
-    os.system(f"rm {EVAL_EXAMPLES}/{EVAL_NAME}.ff")
-    os.system(f"{FEATURIZE} -n {num_shells} -w {shell_width} -P {EVAL_EXAMPLES}/{EVAL_NAME}.ptf > {EVAL_EXAMPLES}/{EVAL_NAME}.ff")
+    # os.system(f"rm {EVAL_EXAMPLES}/{EVAL_NAME}.ff")
+    os.system(f"{FEATURIZE} -n {num_shells} -w {shell_width} -P {EVAL_EXAMPLES}/{EVAL_NAME}.ptf > {out_dir}/{EVAL_NAME}.ff")
 
-    os.system(f"{SCOREIT} -a {model_path} {EVAL_EXAMPLES}/{EVAL_NAME}.ff > {out_dir}/hits.hits")
+    os.system(f"{SCOREIT} -a {model_path} {out_dir}/{EVAL_NAME}.ff > {out_dir}/hits.hits")
     # remove comments
     os.system(f"sed '/^#/d' {out_dir}/hits.hits > {out_dir}/hits_cleaned.hits")
     os.system(f"sort -r -k2 -n {out_dir}/hits_cleaned.hits > {out_dir}/hits.sorted")
@@ -123,10 +125,18 @@ def score_model(model_path, num_shells, shell_width):
 
     os.system(f"echo {eval_time} > {out_dir}/eval_time")
 
+# for multiprocessing
+def do_it(p):
+    num_shells, shell_width, num_bins = p
+    # relative model path
+    model_path = build_feature_model(num_shells, shell_width, num_bins)
+    score_model(model_path, num_shells, shell_width)
+
 if __name__ == "__main__":
+    params = []
     for num_shells in NUM_SHELLS:
         for shell_width in SHELL_WIDTH:
             for num_bins in NUM_BINS:
-                # relative model path
-                model_path = build_feature_model(num_shells, shell_width, num_bins)
-                score_model(model_path, num_shells, shell_width)
+                params.append((num_shells, shell_width, num_bins))
+    with Pool(10) as p:
+        p.map(do_it, params)

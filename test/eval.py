@@ -10,33 +10,20 @@ Compare with gold standard
 """
 
 import math
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 
 GOLD_STANDARD_SITE = "/home/katz/Code/cs279proj/eval/calciums.CA.site"
 # hits file, sorted from highest score (most likely to be a hit) to lowest
-HITS_SORTED_FILE = "/home/katz/Code/cs279proj/out/4-1.25-5-gauss-expr/hits.sorted"
+OUT_DIR = "/home/katz/Code/cs279proj/out"
 
 # max distance for each point
 HIT_ANGSTROM_MAX_DISTANCE = 3
 
-#TARGET_SPECIFICITY = 0.98
-
-
-def get_rates(TARGET_SPECIFICITY):
-    # dict of pdb id: [list of gold standard sites (3-tuples)]
-    gold = {}
-    found = set()
-
-    # returns index of point if corresponds to a gold standard hit, -1 otherwise
-    def is_hit(pdb_id, x, y, z):
-        true_positives = gold[pdb_id]
-        for i in range(len(true_positives)):
-            point = true_positives[i]
-            max_distance = max([abs(x - point[0]), abs(y - point[1]), abs(z - point[2])])
-            if max_distance < HIT_ANGSTROM_MAX_DISTANCE:
-                return i
-        return -1
-
-    with open(GOLD_STANDARD_SITE, "r") as f:
+# create gold standard dict
+gold = {}
+with open(GOLD_STANDARD_SITE, "r") as f:
         lines = f.readlines()
         for line in lines:
             line = line.split(" ")
@@ -48,7 +35,20 @@ def get_rates(TARGET_SPECIFICITY):
             gold[pdb_id].append((x, y, z))
 
 
-    with open(HITS_SORTED_FILE, "r") as f:
+
+
+def get_rates(target_specificity, hits_sorted_file):
+    # returns index of point if corresponds to a gold standard hit, -1 otherwise
+    def is_hit(pdb_id, x, y, z):
+        true_positives = gold[pdb_id]
+        for i in range(len(true_positives)):
+            point = true_positives[i]
+            max_distance = max([abs(x - point[0]), abs(y - point[1]), abs(z - point[2])])
+            if max_distance < HIT_ANGSTROM_MAX_DISTANCE:
+                return i
+        return -1
+
+    with open(hits_sorted_file, "r") as f:
         lines = f.readlines()
         total = len(lines)
         actual_negatives = 0
@@ -62,7 +62,7 @@ def get_rates(TARGET_SPECIFICITY):
             if hit_index == -1:
                 actual_negatives += 1
         
-        target_negatives = int((TARGET_SPECIFICITY * actual_negatives) // 1)
+        target_negatives = int((target_specificity * actual_negatives) // 1)
         num_neg = 0
         cutoff_ind = None
         i = len(lines)
@@ -110,27 +110,40 @@ def get_rates(TARGET_SPECIFICITY):
         return (tp, fp)
 
 
-true_positives = []
-false_positives = []
+def calc_stats(hits_sorted_file, name):
+    true_positives = []
+    false_positives = []
 
-for fpr in range(1, 100, 5):
-    tp, fp = get_rates(1 - fpr/100)
-    print(tp, fp)
-    true_positives.append(tp)
-    false_positives.append(fp)
+    for fpr in range(1, 100, 5):
+        tp, fp = get_rates(1 - fpr/100, hits_sorted_file)
+        true_positives.append(tp)
+        false_positives.append(fp)
 
-import matplotlib.pyplot as plt
-import numpy as np
+    # area under the curve
+    auc = np.trapz(true_positives, false_positives)
 
-auc = np.trapz(true_positives, false_positives)
+    plt.plot(false_positives, true_positives, linestyle='--', marker='o', color='darkorange', lw = 2, label='ROC curve', clip_on=False)
+    plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC curve, AUC =' + str(auc))
+    plt.legend(loc="lower right")
+    plt.savefig(f'results/{name}.png')
 
-plt.plot(false_positives, true_positives, linestyle='--', marker='o', color='darkorange', lw = 2, label='ROC curve', clip_on=False)
-plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
-plt.xlim([0.0, 1.0])
-plt.ylim([0.0, 1.0])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('ROC curve, AUC =' + str(auc))
-plt.legend(loc="lower right")
-plt.savefig('AUC_example.png')
-plt.show()
+    plt.clr()
+    
+    return (true_positives, false_positives, auc)
+
+with open("results/res.csv", "w+") as f:
+    for sub_dir in os.walk(OUT_DIR):
+        dir_path = sub_dir[0]
+        print(dir_path)
+        name = dir_path.split("/")[-1].replace("-expr", "")
+        if name == "out":
+            # exclude the out directory
+            continue
+        num_shells, shell_width, num_bins, model_mode = tuple(name.split("-"))
+        true_positives, false_positives, auc = calc_stats(f"{dir_path}/hits.sorted", name)
+        f.write(f"{name}, {num_shells}, {shell_width}, {num_bins}, {model_mode}, {true_positives[0]}, {false_positives[0]}, {true_positives[2]}, {false_positives[2]}, {auc} \n")
